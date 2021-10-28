@@ -193,7 +193,6 @@ function Order({ params }) {
       enqueueSnackbar(getError(err), { variant: 'error' });
     }
   }
-
   return (
     <Layout title={`Order ${orderId}`}>
       <Typography component="h1" variant="h1">

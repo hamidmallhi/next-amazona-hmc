@@ -20,6 +20,7 @@ export default function Shipping() {
     control,
     formState: { errors },
     setValue,
+    getValues,
   } = useForm();
   const router = useRouter();
   const { state, dispatch } = useContext(Store);
@@ -27,19 +28,41 @@ export default function Shipping() {
     userInfo,
     cart: { shippingAddress },
   } = state;
+  const { location } = shippingAddress;
   useEffect(() => {
     if (!userInfo) {
       router.push('/login?redirect=/shipping');
     }
-    setValue('fullName', shippingAddress?.fullName);
-    setValue('address', shippingAddress?.address);
-    setValue('city', shippingAddress?.city);
-    setValue('postalCode', shippingAddress?.postalCode);
-    setValue('country', shippingAddress?.country);
+    setValue('fullName', shippingAddress.fullName);
+    setValue('address', shippingAddress.address);
+    setValue('city', shippingAddress.city);
+    setValue('postalCode', shippingAddress.postalCode);
+    setValue('country', shippingAddress.country);
+     //eslint-disable-next-line
   }, []);
-
   const classes = useStyles();
   const submitHandler = ({ fullName, address, city, postalCode, country }) => {
+    dispatch({
+      type: 'SAVE_SHIPPING_ADDRESS',
+      payload: { fullName, address, city, postalCode, country, location },
+    });
+    Cookies.set('shippingAddress', {
+      fullName,
+      address,
+      city,
+      postalCode,
+      country,
+      location,
+    });
+    router.push('/payment');
+  };
+
+  const chooseLocationHandler = () => {
+    const fullName = getValues('fullName');
+    const address = getValues('address');
+    const city = getValues('city');
+    const postalCode = getValues('postalCode');
+    const country = getValues('country');
     dispatch({
       type: 'SAVE_SHIPPING_ADDRESS',
       payload: { fullName, address, city, postalCode, country },
@@ -50,8 +73,9 @@ export default function Shipping() {
       city,
       postalCode,
       country,
+      location,
     });
-    router.push('/payment');
+    router.push('/map');
   };
   return (
     <Layout title="Shipping Address">
@@ -200,6 +224,18 @@ export default function Shipping() {
                 ></TextField>
               )}
             ></Controller>
+          </ListItem>
+          <ListItem>
+            <Button
+              variant="contained"
+              type="button"
+              onClick={chooseLocationHandler}
+            >
+              Choose on map
+            </Button>
+            <Typography>
+              {location.lat && `${location.lat}, ${location.lat}`}
+            </Typography>
           </ListItem>
           <ListItem>
             <Button variant="contained" type="submit" fullWidth color="primary">
